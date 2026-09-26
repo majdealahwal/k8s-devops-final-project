@@ -1,0 +1,38 @@
+# ============================
+# Terraform
+# ============================
+*.tfstate
+*.tfstate.*
+.terraform/
+.terraform.lock.hcl
+terraform.tfvars
+crash.log
+
+# ============================
+# SSH Keys (Private)
+# ============================
+*.pem
+*.key
+id_rsa
+id_ed25519
+id_ecdsa
+k8slab_key
+!*.pub
+
+# ============================
+# Kubernetes
+# ============================
+kubeconfig
+admin.conf
+*.kubeconfig
+.kube/
+
+# ============================
+# Python / App 
+# ============================
+__pycache__/
+*.pyc
+venv/
+.env
+
+

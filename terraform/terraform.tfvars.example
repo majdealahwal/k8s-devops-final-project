@@ -1,0 +1,4 @@
+subscription_id     = "00000000-0000-0000-0000-000000000000"
+location            = "eastus"
+admin_username      = "mohamed"
+ssh_public_key_path = "~/.ssh/k8slab_key.pub"
