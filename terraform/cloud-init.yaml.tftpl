@@ -1,0 +1,6 @@
+#cloud-config
+runcmd:
+%{ for n in nodes ~}
+  - echo "${n.private_ip} ${n.hostname}" >> /etc/hosts
+%{ endfor ~}
+  - systemctl enable --now chronyd
