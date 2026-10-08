@@ -1,0 +1,102 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Task Tracker</title>
+  <style>
+    body { font-family: system-ui, sans-serif; max-width: 640px; margin: 2rem auto; padding: 0 1rem; }
+    form { display: flex; gap: .5rem; margin-bottom: 1rem; }
+    input[type=text] { flex: 1; padding: .5rem; }
+    select, button { padding: .5rem; }
+    ul { list-style: none; padding: 0; }
+    li { display: flex; align-items: center; gap: .5rem; padding: .5rem; border-bottom: 1px solid #ddd; }
+    li.done .title { text-decoration: line-through; color: #888; }
+    .title { flex: 1; }
+    .badge { font-size: .75rem; padding: .15rem .5rem; border-radius: 1rem; color: #fff; }
+    .low { background: #2e7d32; } .medium { background: #ef6c00; } .high { background: #c62828; }
+    footer { margin-top: 2rem; color: #888; font-size: .8rem; }
+  </style>
+</head>
+<body>
+  <h1>Task Tracker</h1>
+  <form id="add-form">
+    <input type="text" id="title" placeholder="New task..." required>
+    <select id="priority">
+      <option value="low">Low</option>
+      <option value="medium" selected>Medium</option>
+      <option value="high">High</option>
+    </select>
+    <button type="submit">Add</button>
+  </form>
+  <ul id="tasks"></ul>
+  <footer>Version: {{ version }}</footer>
+
+  <script>
+    async function load() {
+      const res = await fetch('/api/tasks');
+      const tasks = await res.json();
+      const ul = document.getElementById('tasks');
+      ul.innerHTML = '';
+      tasks.forEach(t => {
+        const li = document.createElement('li');
+        if (t.done) li.className = 'done';
+
+        const cb = document.createElement('input');
+        cb.type = 'checkbox';
+        cb.checked = t.done;
+        cb.onchange = () => update(t.id, { done: cb.checked });
+
+        const title = document.createElement('span');
+        title.className = 'title';
+        title.textContent = t.title;
+
+        const badge = document.createElement('span');
+        badge.className = 'badge ' + t.priority;
+        badge.textContent = t.priority;
+
+        const sel = document.createElement('select');
+        ['low', 'medium', 'high'].forEach(p => {
+          const o = document.createElement('option');
+          o.value = p; o.textContent = p; o.selected = (p === t.priority);
+          sel.appendChild(o);
+        });
+        sel.onchange = () => update(t.id, { priority: sel.value });
+
+        const del = document.createElement('button');
+        del.textContent = 'x';
+        del.onclick = async () => {
+          await fetch('/api/tasks/' + t.id, { method: 'DELETE' });
+          load();
+        };
+
+        li.append(cb, title, badge, sel, del);
+        ul.appendChild(li);
+      });
+    }
+
+    async function update(id, body) {
+      await fetch('/api/tasks/' + id, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(body)
+      });
+      load();
+    }
+
+    document.getElementById('add-form').onsubmit = async (e) => {
+      e.preventDefault();
+      const title = document.getElementById('title');
+      await fetch('/api/tasks', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ title: title.value, priority: document.getElementById('priority').value })
+      });
+      title.value = '';
+      load();
+    };
+
+    load();
+  </script>
+</body>
+</html>

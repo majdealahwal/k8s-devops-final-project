@@ -36,3 +36,8 @@ venv/
 .env
 
 
+
+instance/
+*.db
+.pytest_cache/
+__pycache__/
